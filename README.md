@@ -12,9 +12,9 @@ Lightweight probe monitoring — Go + PostgreSQL/SQLite + VictoriaMetrics
 
 ## Native log monitoring
 
-This fork adds local log monitoring to Pika Agent, configured under **Agent details → Log monitoring**. Match file globs with a Go regular expression such as `(?i)error|only`; events appear in the existing alert records and use Pika’s existing notification channels and JSON templates. Enable **Log notifications** in the matching alert rule. Both server and Agent must be upgraded.
+This fork adds local log monitoring to Pika Agent, configured under **Agent details → Log monitoring**. Match file globs with a Go regular expression such as `(?i)error`; events appear in the existing alert records and use Pika’s existing notification channels and JSON templates. Enable **Log notifications** in the matching alert rule. Both server and Agent must be upgraded.
 
-[Download binaries and complete server packages](https://github.com/chiehw/pika/releases/latest) · [Configuration, Clash Party example and delivery limits](./docs/log-monitor.md)
+[Download binaries and complete server packages](https://github.com/chiehw/pika/releases/latest) · [Configuration, examples and delivery limits](./docs/log-monitor.md)
 
 Server archives include the admin frontend, pinned default theme, configuration examples and downloadable agents. Extract the archive, copy `config.sqlite.yaml` to `config.yaml`, configure the database, authentication and VictoriaMetrics endpoint, then run `./pika serve --config config.yaml` from the extracted directory. VictoriaMetrics is a separate dependency. Standalone Agent binaries can be installed using the existing Agent commands.
 

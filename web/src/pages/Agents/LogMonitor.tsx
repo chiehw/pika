@@ -30,7 +30,7 @@ const newRule = (): RuleForm => ({
     name: '',
     enabled: true,
     pathsText: '',
-    regex: '(?i)error|only',
+    regex: '(?i)error',
     level: 'warning',
     cooldownSeconds: 0,
 });
@@ -181,7 +181,7 @@ export default function LogMonitor({ agentId }: { agentId: string }) {
                                             >
                                                 <Input
                                                     maxLength={128}
-                                                    placeholder="Clash Party"
+                                                    placeholder="例如：应用错误日志"
                                                 />
                                             </Form.Item>
                                             <Form.Item
@@ -206,7 +206,7 @@ export default function LogMonitor({ agentId }: { agentId: string }) {
                                             <Input.TextArea
                                                 rows={3}
                                                 placeholder={
-                                                    '~/Library/Application Support/mihomo-party/logs/clash-party-*.log\n~/Library/Application Support/mihomo-party/logs/core-*.log'
+                                                    '请输入探针本机日志文件的完整路径，每行一个'
                                                 }
                                             />
                                         </Form.Item>
@@ -219,7 +219,7 @@ export default function LogMonitor({ agentId }: { agentId: string }) {
                                                     message: '请输入正则表达式',
                                                 },
                                             ]}
-                                            extra="使用 Go 正则语法。例如 (?i)error|only 表示忽略大小写，任一关键词命中即告警。"
+                                            extra="使用 Go 正则语法；(?i)error 表示忽略大小写匹配 error。"
                                         >
                                             <Input maxLength={2048} />
                                         </Form.Item>

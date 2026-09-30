@@ -12,24 +12,25 @@ Pika Agent 原生监控本机日志，匹配后的事件通过现有 WebSocket �
 
 日志事件始终记录；未匹配通知规则、通知开关关闭或处于该规则维护时段时，不发送通知。日志事件类型为 `log`，状态为 `notice`，没有阈值、数值或自动恢复通知。
 
-## Clash Party / macOS 示例
+## 通用应用日志示例
 
-规则名称：`Clash Party`。日志路径：
+规则名称可以填写 `应用错误日志`。请选择当前探针所在机器的实际日志路径；以下路径仅用于说明格式：
 
-```text
-~/Library/Application Support/mihomo-party/logs/clash-party-*.log
-~/Library/Application Support/mihomo-party/logs/core-*.log
-```
+| 平台 | 路径示例 |
+|---|---|
+| Linux | `/var/log/my-app/*.log` |
+| macOS | `/Users/your-user/Logs/my-app/*.log` |
+| Windows | `C:\Logs\my-app\*.log` |
 
-Agent 会把 `~` 展开成运行该 Agent 的用户主目录。以系统服务运行时，建议填写完整路径，例如 `/Users/your-user/Library/Application Support/mihomo-party/logs/core-*.log`，并确认服务用户能读取文件。
+请替换示例中的用户名和目录，确认运行 Agent 的用户能读取文件。Agent 也支持 `~`，会展开成运行该 Agent 的用户主目录；以系统服务运行时，请优先使用完整路径。
 
 匹配表达式：
 
 ```text
-(?i)error|only
+(?i)error
 ```
 
-`(?i)` 表示忽略大小写；`|` 表示任一关键词命中。表达式使用 Go 正则语法。默认每 5 秒检查一次，网页可设为 1–60 秒。冷却时间默认 0，同文日志的每次新增都会产生独立告警；设置大于 0 时，规则冷却期间的命中直接跳过，不生成告警记录。
+`(?i)` 表示忽略大小写，匹配日志中的 `error`。需要匹配多个关键词时，可使用例如 `(?i)error|warn` 的表达式。表达式使用 Go 正则语法。默认每 5 秒检查一次，网页可设为 1–60 秒。冷却时间默认 0，同文日志的每次新增都会产生独立告警；设置大于 0 时，规则冷却期间的命中直接跳过，不生成告警记录。
 
 ## 复用通知模板
 
@@ -48,7 +49,7 @@ Bark 渠道仍按 Pika 已有的自定义 Webhook 配置，地址 `https://api.d
   "device_key": "YOUR_BARK_DEVICE_KEY",
   "title": "{{agent.name}} {{alert.type}}",
   "body": "规则：{{alert.logRuleName}}\n文件：{{alert.logFile}}\n{{alert.message}}",
-  "group": "Clash Party 告警-macbook-air",
+  "group": "Pika 告警",
   "ttl": 600
 }
 ```

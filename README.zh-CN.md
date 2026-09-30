@@ -12,7 +12,7 @@
 
 本分支新增 Pika Agent 本地日志监控，在 **探针详情 → 日志监控** 网页中配置路径、正则、告警级别、检查间隔和冷却时间。命中日志进入现有告警记录，复用 Pika 告警规则、通知渠道和模板；无需安装 logtail。通知需在对应告警规则中开启“日志告警通知”。服务端和 Agent 都需要升级。
 
-[下载二进制与完整服务端运行包](https://github.com/chiehw/pika/releases/latest) · [日志监控配置与 Clash Party 示例](docs/log-monitor.md)
+[下载二进制与完整服务端运行包](https://github.com/chiehw/pika/releases/latest) · [日志监控配置与通用示例](docs/log-monitor.md)
 
 服务端运行包包含管理网页、默认主题、配置示例和 Agent 下载文件。解压后复制 `config.sqlite.yaml` 为 `config.yaml`，配置数据库、认证和 VictoriaMetrics 地址，在解压目录运行 `./pika serve --config config.yaml`。VictoriaMetrics 需单独运行。独立 Agent 二进制可按现有安装流程使用。
 
