@@ -66,6 +66,8 @@ def main():
         with tempfile.TemporaryDirectory(prefix='pika-package-') as temporary:
             package = Path(temporary) / package_name
             package.mkdir()
+            (package / 'data').mkdir()
+            (package / 'logs').mkdir()
             shutil.copy2(dist / f'pika-{goos}-{arch}', package / 'pika')
             (package / 'pika').chmod(0o755)
             shutil.copytree(ROOT / 'web/dist', package / 'web/dist')
