@@ -18,7 +18,7 @@ This fork adds local log monitoring to Pika Agent, configured under **Agent deta
 
 Server archives include the admin frontend, pinned default theme, configuration examples and downloadable agents. Extract the archive, copy `config.sqlite.yaml` to `config.yaml`, configure the database, authentication and VictoriaMetrics endpoint, then run `./pika serve --config config.yaml` from the extracted directory. VictoriaMetrics is a separate dependency. Standalone Agent binaries can be installed using the existing Agent commands.
 
-The Docker examples below use the upstream image; use this fork’s release packages for native log monitoring.
+The Docker examples below use this fork’s GHCR image. Set `PIKA_VERSION` to pin a version, for example `PIKA_VERSION=0.3.3 docker compose -f docker-compose.sqlite.yml up -d`.
 
 ## Overview
 
@@ -75,6 +75,12 @@ See [PostgreSQL guide](./docs/deployment-postgresql.md).
 - [SQLite deployment](./docs/deployment-sqlite.md)
 - [PostgreSQL deployment](./docs/deployment-postgresql.md)
 - [Common config](./docs/common-config.md)
+
+## Docker image publishing
+
+Only pushing a `v*` version tag automatically builds and publishes container images; ordinary branch commits do not. The workflow publishes `ghcr.io/chiehw/pika` for Linux amd64 and arm64, with the original tag (`v0.3.3`), semantic version (`0.3.3`), minor version (`0.3`) and `latest` for stable releases. The image contains the admin frontend, default theme and all supported Agent binaries.
+
+Changing local image tags or `PIKA_VERSION` only selects an existing image; it does not trigger a build. A tag build can also be rerun manually in Actions by selecting that version tag. GHCR packages are private when first created; package visibility can be changed to public in GitHub Packages settings for anonymous pulls.
 
 ## Requirements
 

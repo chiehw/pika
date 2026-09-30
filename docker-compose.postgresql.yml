@@ -33,7 +33,7 @@ services:
     networks:
       - pika-network
   pika:
-    image: dushixiang/pika:latest
+    image: ghcr.io/chiehw/pika:${PIKA_VERSION:-latest}
     container_name: pika-server
     volumes:
       - ./config.yaml:/app/config.yaml

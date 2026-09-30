@@ -16,7 +16,7 @@
 
 服务端运行包包含管理网页、默认主题、配置示例和 Agent 下载文件。解压后复制 `config.sqlite.yaml` 为 `config.yaml`，配置数据库、认证和 VictoriaMetrics 地址，在解压目录运行 `./pika serve --config config.yaml`。VictoriaMetrics 需单独运行。独立 Agent 二进制可按现有安装流程使用。
 
-下面的 Docker 示例使用上游镜像；本分支新增的日志功能请使用 Release 运行包。
+下面的 Docker 示例使用本仓库的 GHCR 镜像。可通过 `PIKA_VERSION` 固定版本，例如 `PIKA_VERSION=0.3.3 docker compose -f docker-compose.sqlite.yml up -d`。
 
 ## 简介
 
@@ -92,6 +92,12 @@ docker-compose -f docker-compose.postgresql.yml up -d
 - [SQLite 版本部署指南](docs/deployment-sqlite.md)
 - [PostgreSQL 版本部署指南](docs/deployment-postgresql.md)
 - [通用配置说明](docs/common-config.md)
+
+## Docker 镜像发布
+
+只有推送 `v*` 版本标签才会自动构建和发布镜像，普通分支提交不会触发。工作流向 `ghcr.io/chiehw/pika` 发布 Linux amd64、arm64 镜像，并提供原始标签（如 `v0.3.3`）、版本号（`0.3.3`）、次版本（`0.3`）以及正式版本的 `latest`。镜像包含管理网页、默认主题和全部受支持的 Agent 二进制。
+
+修改本地镜像标签或 Compose 的 `PIKA_VERSION` 只会选择已有镜像，不会触发构建。需要重跑时，可在 Actions 中手动选择该版本标签运行。GHCR 首次创建的包默认为私有；如需免登录拉取，可在 GitHub Packages 设置中将其改为公开。
 
 ## 环境要求
 

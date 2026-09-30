@@ -4,7 +4,7 @@
 FROM alpine:latest
 
 # 安装运行时依赖
-RUN apk add --no-cache ca-certificates tzdata
+RUN apk add --no-cache ca-certificates tzdata && mkdir -p /app/data /app/logs
 
 # 设置时区为上海
 ENV TZ=Asia/Shanghai
