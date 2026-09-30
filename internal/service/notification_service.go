@@ -112,6 +112,8 @@ func filterChannelsByTypes(channelConfigs []models.NotificationChannelConfig, ty
 
 func isNotificationEnabled(notifications models.AlertNotifications, notificationType string) bool {
 	switch notificationType {
+	case "log":
+		return notifications.LogEnabled
 	case NotificationTypeTraffic:
 		return notifications.TrafficEnabled
 	case NotificationTypeSSHLogin:

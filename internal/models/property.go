@@ -164,6 +164,7 @@ type AlertRules struct {
 
 // AlertNotifications 告警通知开关
 type AlertNotifications struct {
+	LogEnabled             bool `json:"logEnabled"`             // 日志告警通知
 	TrafficEnabled         bool `json:"trafficEnabled"`         // 流量告警通知
 	SSHLoginSuccessEnabled bool `json:"sshLoginSuccessEnabled"` // SSH 登录成功通知
 	TamperEventEnabled     bool `json:"tamperEventEnabled"`     // 防篡改事件通知

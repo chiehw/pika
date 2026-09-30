@@ -2,6 +2,9 @@ package models
 
 // AlertRecord 告警记录
 type AlertRecord struct {
+	LogEventID         *string `gorm:"uniqueIndex" json:"-"`
+	LogRuleName        string  `json:"logRuleName,omitempty"`
+	LogFile            string  `json:"logFile,omitempty"`
 	ID                 int64   `gorm:"primaryKey;autoIncrement" json:"id"`           // 记录ID
 	AgentID            string  `gorm:"index" json:"agentId"`                         // 探针ID
 	AgentName          string  `json:"agentName"`                                    // 探针名称

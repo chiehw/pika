@@ -21,12 +21,7 @@ import (
 
 // InitializeApp 初始化应用
 func InitializeApp(logger *zap.Logger, db *gorm.DB, cfg *config.AppConfig) (*AppComponents, error) {
-	userService := service.NewUserService(logger, cfg)
-	oidcService := service.NewOIDCService(logger, cfg)
-	gitHubOAuthService := service.NewGitHubOAuthService(logger, cfg)
-	accountService := service.NewAccountService(logger, userService, oidcService, gitHubOAuthService, cfg)
-	accountHandler := handler.NewAccountHandler(accountService)
-	apiKeyService := service.NewApiKeyService(logger, db)
+	manager := websocket.NewManager(logger)
 	propertyService := service.NewPropertyService(logger, db)
 	alertRuleService := service.NewAlertRuleService(logger, db, propertyService)
 	notifier := service.NewNotifier(logger)
@@ -34,19 +29,26 @@ func InitializeApp(logger *zap.Logger, db *gorm.DB, cfg *config.AppConfig) (*App
 	trafficService := service.NewTrafficService(logger, db, notificationService)
 	vmClient := provideVMClient(cfg, logger)
 	metricService := service.NewMetricService(logger, db, propertyService, trafficService, vmClient)
+	monitorService := service.NewMonitorService(logger, db, metricService, manager)
+	alertService := service.NewAlertService(logger, db, propertyService, alertRuleService, monitorService, notifier)
+	logMonitorService := service.NewLogMonitorService(logger, db, manager, alertService)
+	logMonitorHandler := handler.NewLogMonitorHandler(logMonitorService)
+	userService := service.NewUserService(logger, cfg)
+	oidcService := service.NewOIDCService(logger, cfg)
+	gitHubOAuthService := service.NewGitHubOAuthService(logger, cfg)
+	accountService := service.NewAccountService(logger, userService, oidcService, gitHubOAuthService, cfg)
+	accountHandler := handler.NewAccountHandler(accountService)
+	apiKeyService := service.NewApiKeyService(logger, db)
 	geoIPService, err := service.NewGeoIPService(logger, cfg)
 	if err != nil {
 		return nil, err
 	}
 	agentService := service.NewAgentService(logger, db, apiKeyService, metricService, geoIPService)
-	manager := websocket.NewManager(logger)
-	monitorService := service.NewMonitorService(logger, db, metricService, manager)
 	tamperService := service.NewTamperService(logger, db, manager, notificationService)
 	ddnsService := service.NewDDNSService(logger, db, propertyService, manager)
 	sshLoginService := service.NewSSHLoginService(logger, db, manager, geoIPService, notificationService)
-	agentHandler := handler.NewAgentHandler(logger, agentService, trafficService, metricService, monitorService, tamperService, ddnsService, sshLoginService, apiKeyService, propertyService, manager)
+	agentHandler := handler.NewAgentHandler(logger, agentService, trafficService, metricService, monitorService, tamperService, ddnsService, sshLoginService, apiKeyService, propertyService, logMonitorService, manager)
 	apiKeyHandler := handler.NewApiKeyHandler(logger, apiKeyService)
-	alertService := service.NewAlertService(logger, db, propertyService, alertRuleService, monitorService, notifier)
 	alertHandler := handler.NewAlertHandler(logger, alertService)
 	alertRuleHandler := handler.NewAlertRuleHandler(logger, alertRuleService, agentService)
 	propertyHandler := handler.NewPropertyHandler(logger, propertyService, notifier)
@@ -63,6 +65,8 @@ func InitializeApp(logger *zap.Logger, db *gorm.DB, cfg *config.AppConfig) (*App
 	webHandler := handler.NewWebHandler(themeService, propertyService)
 	publicIPService := service.NewPublicIPService(logger, db, propertyService, manager)
 	appComponents := &AppComponents{
+		LogMonitorHandler:  logMonitorHandler,
+		LogMonitorService:  logMonitorService,
 		AccountHandler:     accountHandler,
 		AgentHandler:       agentHandler,
 		ApiKeyHandler:      apiKeyHandler,
@@ -99,6 +103,8 @@ func InitializeApp(logger *zap.Logger, db *gorm.DB, cfg *config.AppConfig) (*App
 
 // AppComponents 应用组件
 type AppComponents struct {
+	LogMonitorHandler  *handler.LogMonitorHandler
+	LogMonitorService  *service.LogMonitorService
 	AccountHandler     *handler.AccountHandler
 	AgentHandler       *handler.AgentHandler
 	ApiKeyHandler      *handler.ApiKeyHandler

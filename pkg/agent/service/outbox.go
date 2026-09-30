@@ -137,3 +137,14 @@ func (o *outbox) wait(done <-chan struct{}) bool {
 		return false
 	}
 }
+
+func (o *outbox) hasSeq(seq uint64) bool {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	for _, e := range o.entries {
+		if e.seq == seq {
+			return true
+		}
+	}
+	return false
+}

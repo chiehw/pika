@@ -4,6 +4,7 @@ import (
 	"net"
 	"strings"
 
+	"github.com/pika-monitor/pika/internal/protocol"
 	"gorm.io/datatypes"
 )
 
@@ -34,6 +35,9 @@ type Agent struct {
 
 	// 防篡改保护配置
 	TamperProtectConfig datatypes.JSONType[TamperProtectConfigData] `json:"tamperProtectConfig,omitempty"` // 防篡改保护配置
+
+	// 日志监控配置
+	LogMonitorConfig datatypes.JSONType[LogMonitorConfigData] `json:"logMonitorConfig,omitempty"`
 
 	// SSH登录监控配置
 	SSHLoginConfig datatypes.JSONType[SSHLoginConfigData] `json:"sshLoginConfig,omitempty"` // SSH登录监控配置
@@ -96,4 +100,11 @@ func (r SSHLoginConfigData) IsIPWhitelisted(ip string) bool {
 
 func (Agent) TableName() string {
 	return "agents"
+}
+
+// LogMonitorConfigData 日志规则及探针应用状态。
+type LogMonitorConfigData struct {
+	protocol.LogMonitorConfig
+	ApplyStatus  string `json:"applyStatus,omitempty"`
+	ApplyMessage string `json:"applyMessage,omitempty"`
 }

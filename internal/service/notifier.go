@@ -53,6 +53,7 @@ type AlertTypeMetadata struct {
 
 // 告警类型元数据映射
 var alertTypeMetadataMap = map[string]AlertTypeMetadata{
+	"log": {Name: "日志告警"},
 	"cpu": {
 		Name:          "CPU告警",
 		ThresholdUnit: "%",
@@ -758,6 +759,10 @@ func (n *Notifier) buildCustomBody(agent *models.Agent, record *models.AlertReco
 			v = record.Status
 		case "alert.message":
 			v = record.Message
+		case "alert.logFile":
+			v = record.LogFile
+		case "alert.logRuleName":
+			v = record.LogRuleName
 		case "alert.threshold":
 			v = fmt.Sprintf("%.2f", record.Threshold)
 		case "alert.actualValue":

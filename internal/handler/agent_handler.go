@@ -29,42 +29,47 @@ func (h *AgentHandler) updateEnabled(c *echo.Context, enabled bool) error {
 	if err := h.agentService.UpdateAgentEnabled(c.Request().Context(), agentID, enabled); err != nil {
 		return err
 	}
+	if h.logMonitorService != nil {
+		_ = h.logMonitorService.SendConfig(c.Request().Context(), agentID)
+	}
 	return orz.Ok(c, orz.Map{})
 }
 
 type AgentHandler struct {
-	enabledMu       sync.RWMutex
-	logger          *zap.Logger
-	agentService    *service.AgentService
-	trafficService  *service.TrafficService
-	metricService   *service.MetricService
-	monitorSvc      *service.MonitorService
-	tamperService   *service.TamperService
-	ddnsService     *service.DDNSService
-	sshLoginService *service.SSHLoginService
-	apiKeyService   *service.ApiKeyService
-	propertyService *service.PropertyService
-	wsManager       *ws.Manager
-	upgrader        websocket.Upgrader
+	enabledMu         sync.RWMutex
+	logger            *zap.Logger
+	agentService      *service.AgentService
+	trafficService    *service.TrafficService
+	metricService     *service.MetricService
+	monitorSvc        *service.MonitorService
+	tamperService     *service.TamperService
+	ddnsService       *service.DDNSService
+	sshLoginService   *service.SSHLoginService
+	logMonitorService *service.LogMonitorService
+	apiKeyService     *service.ApiKeyService
+	propertyService   *service.PropertyService
+	wsManager         *ws.Manager
+	upgrader          websocket.Upgrader
 }
 
 func NewAgentHandler(logger *zap.Logger, agentService *service.AgentService, trafficService *service.TrafficService,
 	metricService *service.MetricService, monitorService *service.MonitorService, tamperService *service.TamperService,
 	ddnsService *service.DDNSService, sshLoginService *service.SSHLoginService, apiKeyService *service.ApiKeyService,
-	propertyService *service.PropertyService, wsManager *ws.Manager) *AgentHandler {
+	propertyService *service.PropertyService, logMonitorService *service.LogMonitorService, wsManager *ws.Manager) *AgentHandler {
 
 	h := &AgentHandler{
-		logger:          logger,
-		agentService:    agentService,
-		trafficService:  trafficService,
-		metricService:   metricService,
-		monitorSvc:      monitorService,
-		tamperService:   tamperService,
-		ddnsService:     ddnsService,
-		sshLoginService: sshLoginService,
-		apiKeyService:   apiKeyService,
-		propertyService: propertyService,
-		wsManager:       wsManager,
+		logger:            logger,
+		logMonitorService: logMonitorService,
+		agentService:      agentService,
+		trafficService:    trafficService,
+		metricService:     metricService,
+		monitorSvc:        monitorService,
+		tamperService:     tamperService,
+		ddnsService:       ddnsService,
+		sshLoginService:   sshLoginService,
+		apiKeyService:     apiKeyService,
+		propertyService:   propertyService,
+		wsManager:         wsManager,
 	}
 
 	// 初始化upgrader，需要在创建handler之后因为需要引用h.checkOrigin

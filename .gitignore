@@ -44,3 +44,8 @@ web/node_modules
 web/dist
 themes/default
 deploy.sh
+
+/dist/
+
+__pycache__/
+*.pyc

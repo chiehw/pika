@@ -1,6 +1,7 @@
 import {del, get, post, put} from './request';
 import type {
     Agent,
+    LogMonitorConfig,
     LatestMetrics,
     SSHLoginConfig,
     SSHLoginEvent,
@@ -590,3 +591,6 @@ export interface CleanupMetricsResponse {
 export const cleanupOrphanedAgentMetrics = async () => {
     return post<CleanupMetricsResponse>('/admin/agents/cleanup-metrics', {});
 };
+
+export const getLogMonitorConfig = (agentId: string) => get<LogMonitorConfig>(`/admin/agents/${agentId}/log-monitor/config`);
+export const updateLogMonitorConfig = (agentId: string, config: LogMonitorConfig) => put(`/admin/agents/${agentId}/log-monitor/config`, config);

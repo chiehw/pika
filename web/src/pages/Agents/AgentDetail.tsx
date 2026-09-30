@@ -11,6 +11,7 @@ import AgentEditModal from './AgentEditModal';
 import TamperProtection from './TamperProtection';
 import SSHLoginMonitor from './SSHLoginMonitor';
 import TrafficStats from './TrafficStats';
+import LogMonitor from './LogMonitor';
 import {PageHeader} from '@/components/PageHeader';
 import {PagePanel} from '@/components/PagePanel';
 
@@ -94,6 +95,11 @@ const AgentDetail = () => {
                 </div>
             ),
             children: <TrafficStats agentId={id}/>,
+        },
+        {
+            key: 'log-monitor',
+            label: '日志监控',
+            children: <LogMonitor agentId={id}/>,
         },
         {
             key: 'audit',

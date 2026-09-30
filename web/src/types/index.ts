@@ -504,6 +504,7 @@ export interface AlertRules {
 }
 
 export interface AlertNotifications {
+ logEnabled: boolean; // 日志告警通知
     trafficEnabled: boolean;         // 流量告警通知
     sshLoginSuccessEnabled: boolean; // SSH 登录成功通知
     tamperEventEnabled: boolean;     // 防篡改事件通知
@@ -532,6 +533,8 @@ export interface AlertRule {
 }
 
 export interface AlertRecord {
+ logRuleName?: string;
+ logFile?: string;
     id: number;
     agentId: string;
     agentName: string;
@@ -608,3 +611,10 @@ export interface UpdateSSHLoginConfigRequest {
 
 // 导出 DDNS 相关类型
 export * from './ddns';
+
+export interface LogMonitorRule {
+ id: string; name: string; enabled: boolean; paths: string[]; regex: string; level: string; cooldownSeconds: number;
+}
+export interface LogMonitorConfig {
+ enabled: boolean; pollIntervalSeconds: number; revision?: string; rules: LogMonitorRule[]; applyStatus?: string; applyMessage?: string;
+}

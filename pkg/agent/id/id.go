@@ -12,13 +12,18 @@ import (
 
 // Manager 管理探针的唯一标识
 type Manager struct {
-	idFilePath string
+	idFilePath    string
+	migrateLegacy bool
 }
+
+// NewManagerWithPath creates an isolated identity store at an explicit path.
+func NewManagerWithPath(path string) *Manager { return &Manager{idFilePath: path} }
 
 // NewManager 创建 ID 管理器
 func NewManager() *Manager {
 	return &Manager{
-		idFilePath: GetIDFilePath(),
+		idFilePath:    GetIDFilePath(),
+		migrateLegacy: true,
 	}
 }
 
@@ -46,9 +51,12 @@ func GetIDFilePath() string {
 // 如果 ID 文件存在，则读取；否则生成新的 UUID 并保存
 func (m *Manager) Load() (string, error) {
 	// 尝试从旧路径迁移
-	if err := m.migrateFromOldPath(); err != nil {
-		// 迁移失败不影响后续流程，仅记录错误
-		fmt.Printf("警告: 迁移旧 ID 文件失败: %v\n", err)
+	if m.migrateLegacy {
+		if err := m.migrateFromOldPath(); err != nil {
+			// 迁移失败不影响后续流程，仅记录错误
+			fmt.Printf("警告: 迁移旧 ID 文件失败: %v\n", err)
+		}
+
 	}
 
 	// 尝试读取现有 ID

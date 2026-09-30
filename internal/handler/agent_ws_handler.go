@@ -62,6 +62,16 @@ func (h *AgentHandler) HandleWebSocket(c *echo.Context) error {
 		return err
 	}
 
+	if h.logMonitorService != nil {
+		config, configErr := h.logMonitorService.InitialConfig(context.Background(), agent.ID)
+		if configErr == nil {
+			configErr = conn.WriteJSON(protocol.OutboundMessage{Type: protocol.MessageTypeLogMonitorConfig, Data: config})
+		}
+		if configErr != nil {
+			h.logger.Warn("下发日志监控配置失败", zap.Error(configErr))
+		}
+	}
+
 	if agent.Enabled {
 		// 下发防篡改配置
 		if err := h.sendTamperConfig(conn, agent.ID); err != nil {
@@ -100,6 +110,24 @@ func (h *AgentHandler) handleWebSocketMessage(ctx context.Context, agentID strin
 	}
 
 	switch protocol.MessageType(messageType) {
+	case protocol.MessageTypeLogEvent:
+		var event protocol.LogEvent
+		if err := json.Unmarshal(data, &event); err != nil {
+			return err
+		}
+		if err := h.logMonitorService.HandleEvent(ctx, agentID, event); err != nil {
+			return err
+		}
+		ack, _ := json.Marshal(protocol.OutboundMessage{Type: protocol.MessageTypeLogEventAck, Data: protocol.LogEventAck{ID: event.ID}})
+		// The regular sequence ACK remains authoritative; event ACK also trims the durable local log queue.
+		_ = h.wsManager.SendToClient(agentID, ack)
+		return nil
+	case protocol.MessageTypeLogMonitorResult:
+		var result protocol.LogMonitorResult
+		if err := json.Unmarshal(data, &result); err != nil {
+			return err
+		}
+		return h.logMonitorService.HandleResult(ctx, agentID, result)
 	case protocol.MessageTypeMetrics:
 		return h.handleMetricsMessage(ctx, agentID, data)
 

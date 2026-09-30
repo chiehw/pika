@@ -17,6 +17,8 @@ const NotificationCustomHelp = () => {
                         <div className={'font-semibold mb-1'}>可用变量：</div>
                         <div className={'grid grid-cols-2 gap-x-4 gap-y-1'}>
                             <div>• <code className={'bg-gray-100 dark:bg-gray-700 px-1 rounded'}>{`{{message}}`}</code> - 告警消息</div>
+ <div>• <code>{`{{alert.logFile}}`}</code> - 日志文件路径</div>
+ <div>• <code>{`{{alert.logRuleName}}`}</code> - 日志监控规则名称</div>
                             <div>• <code className={'bg-gray-100 dark:bg-gray-700 px-1 rounded'}>{`{{agent.id}}`}</code> - 探针ID</div>
                             <div>• <code className={'bg-gray-100 dark:bg-gray-700 px-1 rounded'}>{`{{agent.name}}`}</code> - 探针名称</div>
                             <div>• <code className={'bg-gray-100 dark:bg-gray-700 px-1 rounded'}>{`{{agent.hostname}}`}</code> - 主机名</div>

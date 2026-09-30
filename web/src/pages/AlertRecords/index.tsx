@@ -32,7 +32,8 @@ const AlertRecordList = () => {
 
     // 告警类型中文映射
     const alertTypeMap: Record<string, string> = {
-        cpu: 'CPU使用率',
+        log: '日志告警',
+ cpu: 'CPU使用率',
         memory: '内存使用率',
         disk: '磁盘使用率',
         network: '网速',
@@ -172,21 +173,23 @@ const AlertRecordList = () => {
                 if (record.configName) {
                     return record.configName;
                 }
-                return (!record.configId || record.configId === 'global') ? '默认规则' : record.configId;
+                if (record.alertType === 'log' && (!record.configId || record.configId === 'global')) return '未匹配通知规则';
+ return (!record.configId || record.configId === 'global') ? '默认规则' : record.configId;
             },
         },
         {
             title: '告警消息',
             dataIndex: 'message',
             width: 320,
-            ellipsis: true,
+            render: (_, record) => <div style={{whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'}}>{record.logRuleName && <div>{record.logRuleName} · {record.logFile}</div>}{record.message}</div>,
         },
         {
             title: '阈值',
             dataIndex: 'threshold',
             width: 100,
             render: (_, record) => {
-                if (record.alertType === 'network') {
+                if (record.alertType === 'log') return '-';
+ if (record.alertType === 'network') {
                     return `${record.threshold.toFixed(2)} MB/s`;
                 }
                 if (record.alertType === 'cert' || record.alertType === 'agent_expire') {
@@ -203,7 +206,8 @@ const AlertRecordList = () => {
             dataIndex: 'actualValue',
             width: 100,
             render: (_, record) => {
-                if (record.alertType === 'network') {
+                if (record.alertType === 'log') return '-';
+ if (record.alertType === 'network') {
                     return `${record.actualValue.toFixed(2)} MB/s`;
                 }
                 if (record.alertType === 'cert' || record.alertType === 'agent_expire') {
@@ -224,7 +228,8 @@ const AlertRecordList = () => {
                 if (record.status !== 'resolved' || record.resolvedValue === undefined) {
                     return '-';
                 }
-                if (record.alertType === 'network') {
+                if (record.alertType === 'log') return '-';
+ if (record.alertType === 'network') {
                     return `${record.resolvedValue.toFixed(2)} MB/s`;
                 }
                 if (record.alertType === 'cert' || record.alertType === 'agent_expire') {

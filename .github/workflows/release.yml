@@ -1,67 +1,50 @@
-name: 创建 Release
-
+name: Build binaries and publish Release
 on:
   push:
     tags:
-      - 'v*'  # 当推送以 v 开头的 tag 时触发
-
+      - 'v*'
 permissions:
   contents: write
-
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  create-release:
+  release:
     runs-on: ubuntu-latest
     steps:
-      # 检出代码
-      - name: 检出代码
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 获取完整的 git 历史,用于生成更新日志
-
-      # 获取版本号
-      - name: 获取版本号
-        id: get_version
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "当前版本: ${VERSION}"
-
-      # 生成更新日志
-      - name: 生成更新日志
-        id: changelog
-        run: |
-          # 获取上一个 tag
-          PREVIOUS_TAG=$(git tag --sort=-version:refname | sed -n '2p')
-
-          if [ -z "$PREVIOUS_TAG" ]; then
-            echo "这是第一个 release"
-            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
-          else
-            echo "对比 ${PREVIOUS_TAG} 和当前版本的变更"
-            CHANGELOG=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
-          fi
-
-          # 保存到文件
-          echo "${CHANGELOG}" > changelog.txt
-          cat changelog.txt
-
-      # 创建 GitHub Release
-      - name: 创建 Release
-        uses: softprops/action-gh-release@v1
+          fetch-depth: 0
+      - name: Read pinned default theme
+        run: echo "DEFAULT_THEME_REF=$(tr -d '\r\n' < .github/default-theme.ref)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
         with:
-          name: Release ${{ steps.get_version.outputs.version }}
-          body_path: changelog.txt
-          draft: false
-          prerelease: false
-          generate_release_notes: true  # 自动生成 release notes
+          repository: pika-monitor/pika-default-theme
+          ref: ${{ env.DEFAULT_THEME_REF }}
+          path: pika-default-theme
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Go tests
+        run: go test ./...
+      - name: Build frontends, binaries and packages
+        run: python3 scripts/build-release.py --version "${GITHUB_REF_NAME}" --theme-dir pika-default-theme
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pika-${{ github.ref_name }}
+          path: dist/*
+      - name: Publish binaries
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # 生成总结
-      - name: 生成构建总结
+          GH_TOKEN: ${{ github.token }}
         run: |
-          echo "## Release 创建成功 🎉" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**版本:** ${{ steps.get_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Release 链接:** https://github.com/${{ github.repository }}/releases/tag/${{ steps.get_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" dist/* --clobber
+          elif test -f "docs/releases/${GITHUB_REF_NAME}.md"; then
+            gh release create "${GITHUB_REF_NAME}" dist/* --verify-tag --title "Pika ${GITHUB_REF_NAME}" --notes-file "docs/releases/${GITHUB_REF_NAME}.md"
+          else
+            gh release create "${GITHUB_REF_NAME}" dist/* --verify-tag --title "Pika ${GITHUB_REF_NAME}" --generate-notes
+          fi

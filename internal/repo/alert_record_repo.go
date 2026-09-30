@@ -6,6 +6,7 @@ import (
 	"github.com/go-orz/orz"
 	"github.com/pika-monitor/pika/internal/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type AlertRecordRepo struct {
@@ -57,4 +58,9 @@ func (r *AlertRecordRepo) GetLatestAlertRecord(ctx context.Context, configID str
 
 func (r *AlertRecordRepo) Clear(ctx context.Context) error {
 	return r.db.WithContext(ctx).Where("1=1").Delete(&models.AlertRecord{}).Error
+}
+
+func (r *AlertRecordRepo) CreateLogRecord(ctx context.Context, record *models.AlertRecord) (bool, error) {
+	result := r.db.WithContext(ctx).Clauses(clause.OnConflict{Columns: []clause.Column{{Name: "log_event_id"}}, DoNothing: true}).Create(record)
+	return result.RowsAffected > 0, result.Error
 }

@@ -39,6 +39,7 @@ func InitializeApp(logger *zap.Logger, db *gorm.DB, cfg *config.AppConfig) (*App
 		service.NewGeoIPService,
 		service.NewDDNSService,
 		service.NewSSHLoginService,
+		service.NewLogMonitorService,
 		service.NewPublicIPService,
 		service.NewThemeService,
 
@@ -58,6 +59,7 @@ func InitializeApp(logger *zap.Logger, db *gorm.DB, cfg *config.AppConfig) (*App
 		handler.NewDNSProviderHandler,
 		handler.NewDDNSHandler,
 		handler.NewSSHLoginHandler,
+		handler.NewLogMonitorHandler,
 		handler.NewThemeHandler,
 		handler.NewWebHandler,
 
@@ -69,6 +71,8 @@ func InitializeApp(logger *zap.Logger, db *gorm.DB, cfg *config.AppConfig) (*App
 
 // AppComponents 应用组件
 type AppComponents struct {
+	LogMonitorHandler  *handler.LogMonitorHandler
+	LogMonitorService  *service.LogMonitorService
 	AccountHandler     *handler.AccountHandler
 	AgentHandler       *handler.AgentHandler
 	ApiKeyHandler      *handler.ApiKeyHandler

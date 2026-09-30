@@ -23,6 +23,7 @@ func (h *AgentHandler) Get(c *echo.Context) error {
 	}
 
 	// 隐藏敏感配置
+	agent.LogMonitorConfig = datatypes.JSONType[models.LogMonitorConfigData]{}
 	agent.SSHLoginConfig = datatypes.JSONType[models.SSHLoginConfigData]{}
 	agent.TamperProtectConfig = datatypes.JSONType[models.TamperProtectConfigData]{}
 

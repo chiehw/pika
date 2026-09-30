@@ -10,6 +10,7 @@ import {AlertRulesFields, DEFAULT_ALERT_RULES} from './AlertRulesFields';
 
 // 新建规则时的默认事件通知开关（默认全部关闭，由用户按需开启）
 const DEFAULT_ALERT_NOTIFICATIONS = {
+ logEnabled: false,
     trafficEnabled: false,
     sshLoginSuccessEnabled: false,
     tamperEventEnabled: false,
@@ -323,6 +324,13 @@ const AlertRuleModal = ({open, rule, onCancel, onSuccess}: AlertRuleModalProps) 
                     <Form.Item
                         label="流量告警通知"
                         name={['notifications', 'trafficEnabled']}
+                        valuePropName="checked"
+                    >
+                        <Switch checkedChildren="开启" unCheckedChildren="关闭"/>
+                    </Form.Item>
+                    <Form.Item
+                        label="日志告警通知"
+                        name={['notifications', 'logEnabled']}
                         valuePropName="checked"
                     >
                         <Switch checkedChildren="开启" unCheckedChildren="关闭"/>

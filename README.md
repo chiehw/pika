@@ -10,6 +10,16 @@ Lightweight probe monitoring — Go + PostgreSQL/SQLite + VictoriaMetrics
 
 </div>
 
+## Native log monitoring
+
+This fork adds local log monitoring to Pika Agent, configured under **Agent details → Log monitoring**. Match file globs with a Go regular expression such as `(?i)error|only`; events appear in the existing alert records and use Pika’s existing notification channels and JSON templates. Enable **Log notifications** in the matching alert rule. Both server and Agent must be upgraded.
+
+[Download binaries and complete server packages](https://github.com/chiehw/pika/releases/latest) · [Configuration, Clash Party example and delivery limits](./docs/log-monitor.md)
+
+Server archives include the admin frontend, pinned default theme, configuration examples and downloadable agents. Extract the archive, copy `config.sqlite.yaml` to `config.yaml`, configure the database, authentication and VictoriaMetrics endpoint, then run `./pika serve --config config.yaml` from the extracted directory. VictoriaMetrics is a separate dependency. Standalone Agent binaries can be installed using the existing Agent commands.
+
+The Docker examples below use the upstream image; use this fork’s release packages for native log monitoring.
+
 ## Overview
 
 Pika is a lightweight probe monitoring system. Probes push metrics to the server over WebSocket; VictoriaMetrics stores time-series while PostgreSQL/SQLite stores business data. Beyond monitoring, it provides Linux incident response and baseline checks to surface security risks early.
@@ -37,8 +47,8 @@ See [Features](./docs/features.md) for details.
 ### SQLite
 
 ```bash
-curl -O https://raw.githubusercontent.com/pika-monitor/pika/main/docker-compose.sqlite.yml
-curl -o config.yaml https://raw.githubusercontent.com/pika-monitor/pika/main/config.sqlite.yaml
+curl -O https://raw.githubusercontent.com/chiehw/pika/main/docker-compose.sqlite.yml
+curl -o config.yaml https://raw.githubusercontent.com/chiehw/pika/main/config.sqlite.yaml
 # Edit config.yaml: change JWT secret and admin password
 docker compose -f docker-compose.sqlite.yml up -d
 # Open http://localhost:8080  — default admin / admin123
@@ -49,8 +59,8 @@ See [SQLite guide](./docs/deployment-sqlite.md).
 ### PostgreSQL
 
 ```bash
-curl -O https://raw.githubusercontent.com/pika-monitor/pika/main/docker-compose.postgresql.yml
-curl -o config.yaml https://raw.githubusercontent.com/pika-monitor/pika/main/config.postgresql.yaml
+curl -O https://raw.githubusercontent.com/chiehw/pika/main/docker-compose.postgresql.yml
+curl -o config.yaml https://raw.githubusercontent.com/chiehw/pika/main/config.postgresql.yaml
 # Edit config.yaml: change database password, JWT secret and admin password
 docker compose -f docker-compose.postgresql.yml up -d
 # Open http://localhost:8080  — default admin / admin123
@@ -60,6 +70,7 @@ See [PostgreSQL guide](./docs/deployment-postgresql.md).
 
 ## Docs
 
+- [Native log monitoring](./docs/log-monitor.md)
 - [Features](./docs/features.md)
 - [SQLite deployment](./docs/deployment-sqlite.md)
 - [PostgreSQL deployment](./docs/deployment-postgresql.md)

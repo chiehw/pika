@@ -8,6 +8,16 @@
 
 </div>
 
+## 原生日志监控与二进制下载
+
+本分支新增 Pika Agent 本地日志监控，在 **探针详情 → 日志监控** 网页中配置路径、正则、告警级别、检查间隔和冷却时间。命中日志进入现有告警记录，复用 Pika 告警规则、通知渠道和模板；无需安装 logtail。通知需在对应告警规则中开启“日志告警通知”。服务端和 Agent 都需要升级。
+
+[下载二进制与完整服务端运行包](https://github.com/chiehw/pika/releases/latest) · [日志监控配置与 Clash Party 示例](docs/log-monitor.md)
+
+服务端运行包包含管理网页、默认主题、配置示例和 Agent 下载文件。解压后复制 `config.sqlite.yaml` 为 `config.yaml`，配置数据库、认证和 VictoriaMetrics 地址，在解压目录运行 `./pika serve --config config.yaml`。VictoriaMetrics 需单独运行。独立 Agent 二进制可按现有安装流程使用。
+
+下面的 Docker 示例使用上游镜像；本分支新增的日志功能请使用 Release 运行包。
+
 ## 简介
 
 Pika 是一个轻量级的探针监控系统，支持实时数据采集、存储和查询。系统采用 WebSocket 进行探针与服务端的通信，使用 VictoriaMetrics 存储时序指标数据，支持 PostgreSQL 和 SQLite 两种数据库方案。除了基础监控功能外，还提供 Linux 应急响应和安全基线检查能力，帮助快速发现和分析系统安全风险。
@@ -15,6 +25,7 @@ Pika 是一个轻量级的探针监控系统，支持实时数据采集、存储
 ## 功能特性
 
 - **📊 实时性能监控**：CPU、内存、磁盘、网络、GPU、温度等系统资源监控
+- **📄 日志监控**：网页配置本地文件与正则，原生 Agent 采集，复用告警和通知模板
 - **🔍 服务监控**：HTTP/HTTPS、TCP 端口、ICMP/Ping 监控，支持证书到期检测
 - **🛡️ 防篡改保护**：文件实时监控、属性巡检、事件告警
 - **🔒 安全审计**：资产清单收集、安全风险分析、历史审计记录
@@ -40,8 +51,8 @@ Pika 是一个轻量级的探针监控系统，支持实时数据采集、存储
 
 ```bash
 # 下载配置文件
-curl -O https://raw.githubusercontent.com/dushixiang/pika/main/docker-compose.sqlite.yml
-curl -o config.yaml https://raw.githubusercontent.com/dushixiang/pika/main/config.sqlite.yaml
+curl -O https://raw.githubusercontent.com/chiehw/pika/main/docker-compose.sqlite.yml
+curl -o config.yaml https://raw.githubusercontent.com/chiehw/pika/main/config.sqlite.yaml
 
 # 修改配置（重要：修改 JWT Secret 和管理员密码）
 # 编辑 config.yaml
@@ -59,8 +70,8 @@ docker-compose -f docker-compose.sqlite.yml up -d
 
 ```bash
 # 下载配置文件
-curl -O https://raw.githubusercontent.com/dushixiang/pika/main/docker-compose.postgresql.yml
-curl -o config.yaml https://raw.githubusercontent.com/dushixiang/pika/main/config.postgresql.yaml
+curl -O https://raw.githubusercontent.com/chiehw/pika/main/docker-compose.postgresql.yml
+curl -o config.yaml https://raw.githubusercontent.com/chiehw/pika/main/config.postgresql.yaml
 
 # 修改配置（重要：修改数据库密码、JWT Secret 和管理员密码）
 # 编辑 config.yaml
@@ -76,6 +87,7 @@ docker-compose -f docker-compose.postgresql.yml up -d
 
 ## 文档
 
+- [日志监控](docs/log-monitor.md)
 - [功能特性](docs/features.md)
 - [SQLite 版本部署指南](docs/deployment-sqlite.md)
 - [PostgreSQL 版本部署指南](docs/deployment-postgresql.md)

@@ -231,6 +231,10 @@ func setupApi(app *orz.App, components *AppComponents) error {
 		adminApi.GET("/agents/:id/tamper/events", components.TamperHandler.ListEvents)
 		adminApi.DELETE("/agents/:id/tamper/events", components.TamperHandler.DeleteEvents)
 
+		// 日志监控配置（管理员功能）
+		adminApi.GET("/agents/:id/log-monitor/config", components.LogMonitorHandler.GetConfig)
+		adminApi.PUT("/agents/:id/log-monitor/config", components.LogMonitorHandler.UpdateConfig)
+
 		// SSH 登录监控管理（管理员功能）
 		adminApi.GET("/agents/:id/ssh-login/config", components.SSHLoginHandler.GetConfig)
 		adminApi.POST("/agents/:id/ssh-login/config", components.SSHLoginHandler.UpdateConfig)

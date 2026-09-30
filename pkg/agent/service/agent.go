@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -18,6 +19,7 @@ import (
 	"github.com/pika-monitor/pika/pkg/agent/collector"
 	"github.com/pika-monitor/pika/pkg/agent/config"
 	"github.com/pika-monitor/pika/pkg/agent/id"
+	"github.com/pika-monitor/pika/pkg/agent/logmonitor"
 	"github.com/pika-monitor/pika/pkg/agent/sshmonitor"
 	"github.com/pika-monitor/pika/pkg/agent/tamper"
 	"github.com/pika-monitor/pika/pkg/version"
@@ -84,6 +86,8 @@ func (sc *safeConn) WriteControl(messageType int, data []byte, deadline time.Tim
 
 // Agent 探针服务
 type Agent struct {
+	logMonitor       *logmonitor.Monitor
+	logMonitorErr    error
 	cfg              *config.Config
 	idMgr            *id.Manager
 	bootID           string
@@ -100,8 +104,14 @@ type Agent struct {
 
 // New 创建 Agent 实例
 func New(cfg *config.Config) *Agent {
+	stateDir := config.GetDataDir()
+	if cfg.Path != "" {
+		stateDir = filepath.Dir(cfg.Path)
+	}
+	logMonitor, logMonitorErr := logmonitor.New(filepath.Join(stateDir, "log-monitor-state.json"))
 	return &Agent{
-		cfg:              cfg,
+		cfg:        cfg,
+		logMonitor: logMonitor, logMonitorErr: logMonitorErr,
 		idMgr:            id.NewManager(),
 		bootID:           uuid.NewString(),
 		collectorManager: collector.NewManager(cfg),
@@ -114,6 +124,9 @@ func New(cfg *config.Config) *Agent {
 
 // Start 启动探针服务
 func (a *Agent) Start(ctx context.Context) error {
+	if a.logMonitorErr != nil {
+		return a.logMonitorErr
+	}
 	// 创建可取消的 context
 	ctx, cancel := context.WithCancel(ctx)
 	a.cancel = cancel
@@ -125,6 +138,8 @@ func (a *Agent) Start(ctx context.Context) error {
 	// 断线和退避期间仍持续写入 outbox，避免上游小缓冲区溢出丢事件。
 	go a.tamperEventLoop(ctx)
 	go a.sshLoginEventLoop(ctx)
+	go a.logMonitor.Run(ctx)
+	go a.logEventLoop(ctx)
 
 	// 启动探针主循环
 	b := &backoff.Backoff{
@@ -340,6 +355,15 @@ func (a *Agent) readLoop(conn *websocket.Conn, done chan struct{}) error {
 			go a.handlePublicIPConfig(msg.Data)
 		case protocol.MessageTypeSSHLoginConfig:
 			go a.handleSSHLoginConfig(msg.Data)
+		case protocol.MessageTypeLogMonitorConfig:
+			a.handleLogMonitorConfig(msg.Data)
+		case protocol.MessageTypeLogEventAck:
+			var ack protocol.LogEventAck
+			if json.Unmarshal(msg.Data, &ack) == nil {
+				if err := a.logMonitor.Acknowledge(ack.ID); err != nil {
+					slog.Warn("持久化日志确认失败", "error", err)
+				}
+			}
 		case protocol.MessageTypeUninstall:
 			go a.handleUninstall()
 		case protocol.MessageTypeAck:
