@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import type {TabsProps} from 'antd';
 import {Alert, Spin, Tabs, Tag} from 'antd';
-import {Activity, ArrowLeft, Edit, FileWarning, Lock, Shield, TrendingUp} from 'lucide-react';
+import {Activity, ArrowLeft, Edit, FileText, FileWarning, Lock, Shield, TrendingUp} from 'lucide-react';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {getAgentForAdmin, getTags} from '@/api/agent.ts';
 import AgentBasicInfo from './AgentBasicInfo';
@@ -98,7 +98,7 @@ const AgentDetail = () => {
         },
         {
             key: 'log-monitor',
-            label: '日志监控',
+            label: <div className="flex items-center gap-2 text-sm"><FileText size={16}/><div>日志监控</div></div>,
             children: <LogMonitor agentId={id}/>,
         },
         {
